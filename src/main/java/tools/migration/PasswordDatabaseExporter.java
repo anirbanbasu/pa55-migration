@@ -139,6 +139,12 @@ public class PasswordDatabaseExporter {
 			
 			if(cmd.hasOption(outputFilePathOption)) {
 				pde.exportDabaseToJSON(database, new File(cmd.getOptionValue(outputFilePathOption)));
+				if(cmd.hasOption(generatePasswordsOption)) {
+					System.out.println("Written plaintext password database with generated passwords to " + cmd.getOptionValue(outputFilePathOption));
+				}
+				else {
+					System.out.println("Written plaintext password database to " + cmd.getOptionValue(outputFilePathOption));
+				}
 			}
 			else {
 				System.out.println(gson.toJson(database));
