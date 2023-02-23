@@ -30,6 +30,7 @@
 	  <artifactId>opencsv</artifactId>
 	  <version>5.7.1</version>
 	</dependency>
+	
   </dependencies>
   
   <build>
@@ -55,6 +56,56 @@
           </goals>
         </execution>
       </executions>
+    </plugin>
+    
+    <plugin>
+        <groupId>org.cyclonedx</groupId>
+        <artifactId>cyclonedx-maven-plugin</artifactId>
+        <configuration>
+            <projectType>library</projectType>
+            <schemaVersion>1.4</schemaVersion>
+            <includeBomSerialNumber>true</includeBomSerialNumber>
+            <includeCompileScope>true</includeCompileScope>
+            <includeProvidedScope>true</includeProvidedScope>
+            <includeRuntimeScope>true</includeRuntimeScope>
+            <includeSystemScope>true</includeSystemScope>
+            <includeTestScope>false</includeTestScope>
+            <includeLicenseText>false</includeLicenseText>
+            <outputReactorProjects>true</outputReactorProjects>
+            <outputFormat>all</outputFormat>
+            <outputName>CycloneDX-SBOM</outputName>
+            <outputDirectory>${project.build.directory}</outputDirectory><!-- usually target, if not redefined in pom.xml -->
+            <verbose>true</verbose><!-- = ${cyclonedx.verbose} -->
+        </configuration>
+        <executions>
+            <execution>
+                <phase>package</phase>
+                <goals>
+                    <goal>makeAggregateBom</goal>
+                </goals>
+            </execution>
+        </executions>
+    </plugin>
+    
+    <plugin>
+        <groupId>org.spdx</groupId>
+        <artifactId>spdx-maven-plugin</artifactId>
+        <!-- please check for updates on https://search.maven.org/search?q=a:spdx-maven-plugin -->  
+        <version>0.6.4</version>
+        <executions>
+            <execution>
+                <id>build-spdx</id>
+                <goals>
+                    <goal>createSPDX</goal>
+                </goals>
+            </execution>
+        </executions>
+        <configuration>
+          <excludedFilePatterns>
+            <param>*.spdx</param>
+          </excludedFilePatterns>
+          <!-- See documentation below for additional configuration -->
+        </configuration>
     </plugin>
   </plugins>
 </build>
