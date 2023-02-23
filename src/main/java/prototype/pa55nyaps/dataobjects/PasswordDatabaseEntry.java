@@ -60,6 +60,7 @@ public class PasswordDatabaseEntry implements Serializable {
 	private ExtendedNotes notes;
 	private int issue;
 	private int length;
+	private String generatedPassword;
 	
 	public PasswordDatabaseEntry() { }
 	
@@ -100,5 +101,13 @@ public class PasswordDatabaseEntry implements Serializable {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getGeneratedPassword() {
+		return generatedPassword;
+	}
+
+	public void setGeneratedPassword(String generatedPassword) {
+		this.generatedPassword = generatedPassword;
 	}
 }

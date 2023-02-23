@@ -28,9 +28,11 @@ import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.cli.*;
 
+import prototype.pa55nyaps.core.NYAPSCore;
 import prototype.pa55nyaps.crypto.AESCryptosystem;
 import prototype.pa55nyaps.dataobjects.Ciphertext;
 import prototype.pa55nyaps.dataobjects.PasswordDatabase;
+import prototype.pa55nyaps.dataobjects.PasswordDatabaseEntry;
 
 /**
  * @author abasu
@@ -51,29 +53,65 @@ public class PasswordDatabaseExporter {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		Options options = new Options();
+		
+		Option helpOption = Option.builder("h")
+				.longOpt("help")
+				.required(false)
+				.hasArg(false)
+				.desc("Print this help message.")
+				.type(Boolean.class)
+				.build();
+		options.addOption(helpOption);
+		
+		Option inputFilePathOption = Option.builder("i")
+				.longOpt("input")
+				.required(true)
+				.hasArg(true)
+				.argName("input file")
+				.desc("Input PA55 NYAPS encrypted password database file path.")
+				.type(String.class)
+				.build();
+		options.addOption(inputFilePathOption);
+		
+		Option outputFilePathOption = Option.builder("o")
+				.longOpt("output")
+				.required(false)
+				.hasArg(true)
+				.argName("output file")
+				.desc("Output PA55 NYAPS plaintext password database file path. Output file will contain generated passwords if -g is specified.")
+				.type(String.class)
+				.build();
+		options.addOption(outputFilePathOption);
+		
+		Option generatePasswordsOption = Option.builder("g")
+				.longOpt("generate")
+				.required(false)
+				.hasArg(false)
+				.desc("Generate passwords for each database entry.")
+				.type(Boolean.class)
+				.build();
+		options.addOption(generatePasswordsOption);
+		
+		CommandLineParser parser = new DefaultParser();
+		HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd = null; 
+
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            formatter.printHelp(PasswordDatabaseExporter.class.getName(), options, true);
+
+            System.exit(1);
+        }
+        
+        if(cmd.hasOption(helpOption)) {
+        	formatter.printHelp(PasswordDatabaseExporter.class.getName(), options, true);
+        }
+        
+        
 		try {
-			Options options = new Options();
-			Option inputFilePathOption = new Option("i", "input", true, "input PA55 NYAPS encrypted password database file path");
-			inputFilePathOption.setRequired(true);
-			options.addOption(inputFilePathOption);
-			
-			Option outputFilePathOption = new Option("o", "output", true, "output PA55 NYAPS plaintext password database file path");
-			outputFilePathOption.setRequired(false);
-			options.addOption(outputFilePathOption);
-			
-			CommandLineParser parser = new DefaultParser();
-			HelpFormatter formatter = new HelpFormatter();
-	        CommandLine cmd = null;//not a good practice, it serves it purpose 
-	
-	        try {
-	            cmd = parser.parse(options, args);
-	        } catch (ParseException e) {
-	            System.out.println(e.getMessage());
-	            formatter.printHelp("utility-name", options);
-	
-	            System.exit(1);
-	        }
-	        
 	        String inputFilePath = cmd.getOptionValue(inputFilePathOption);
 	        Console console = System.console();
 			String password = new String(console.readPassword("Enter the password to decrypt %s: ", inputFilePath));
@@ -82,6 +120,22 @@ public class PasswordDatabaseExporter {
 	        
 			PasswordDatabaseExporter pde = new PasswordDatabaseExporter();
 			PasswordDatabase database = pde.readDatabaseFromFile(new File(inputFilePath), password);
+			
+			if(cmd.hasOption(generatePasswordsOption)) {
+				String masterSecret = new String(console.readPassword("Enter the master secret to generate passwords: "));
+				int countEntries = database.getDatabase().values().size();
+				int current = 0;
+				for (PasswordDatabaseEntry entry : database.getDatabase().values()) {
+					current++;
+					System.out.print("Generating passwords: "+ current + " of " + countEntries + " \r");
+					String dynamicHint = entry.getNotes().toString();
+	    			dynamicHint += entry.getIssue();
+	    			String generatedPassword = NYAPSCore.generatePasswordWithAESDRBG(masterSecret, dynamicHint, entry.getLength(), 
+	    					entry.getCharacterTypes(), entry.getUserDefinedCharacters());
+	    			entry.setGeneratedPassword(generatedPassword);
+				}
+				System.out.println();
+			}
 			
 			if(cmd.hasOption(outputFilePathOption)) {
 				pde.exportDabaseToJSON(database, new File(cmd.getOptionValue(outputFilePathOption)));
