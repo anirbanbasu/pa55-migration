@@ -1,7 +1,7 @@
 # Command line migration tool for PA55NYAPS
 
 ## Summary
-This command line migration tool for PA55NYAPS generates the password for each PA55NYAPS password database entry and exports the generated password along with relevant information as JSON or CSV in order to import into any other password manager. When exported as JSON, for PA55NYAPS, the file contains the entire password database including the settings for each password database entry along with the corresponding generated password. If the exported file is CSV, information about character classes are dropped.
+This command line migration tool for PA55NYAPS ([GitHub](https://github.com/pa55/pa55nyaps/)) generates the password for each PA55NYAPS password database entry and exports the generated password along with relevant information as JSON or CSV in order to import into any other password manager. When exported as JSON, for PA55NYAPS, the file contains the entire password database including the settings for each password database entry along with the corresponding generated password. If the exported file is CSV, information about character classes are dropped.
 
 ## How to use
 
