@@ -1,7 +1,7 @@
 /*
 PA55 NYAPS Java Reference Implementation
 
-Copyright 2015 Anirban Basu
+Copyright 2023 Anirban Basu
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
