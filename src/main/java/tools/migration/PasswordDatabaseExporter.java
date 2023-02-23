@@ -14,6 +14,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import javax.crypto.BadPaddingException;
@@ -25,6 +27,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 
 import org.apache.commons.cli.*;
 
@@ -33,6 +39,7 @@ import prototype.pa55nyaps.crypto.AESCryptosystem;
 import prototype.pa55nyaps.dataobjects.Ciphertext;
 import prototype.pa55nyaps.dataobjects.PasswordDatabase;
 import prototype.pa55nyaps.dataobjects.PasswordDatabaseEntry;
+import tools.migration.dataobjects.CSVBeanStandardPasswordEntry;
 
 /**
  * @author abasu
@@ -76,7 +83,7 @@ public class PasswordDatabaseExporter {
 		
 		Option outputFilePathOption = Option.builder("o")
 				.longOpt("output")
-				.required(false)
+				.required(true)
 				.hasArg(true)
 				.argName("output file")
 				.desc("Output PA55 NYAPS plaintext password database file path. Output file will contain generated passwords if -g is specified.")
@@ -92,6 +99,15 @@ public class PasswordDatabaseExporter {
 				.type(Boolean.class)
 				.build();
 		options.addOption(generatePasswordsOption);
+		
+		Option outputCSVOption = Option.builder("c")
+				.longOpt("csv")
+				.required(false)
+				.hasArg(false)
+				.desc("Output a CSV line for each database entry instead of JSON.")
+				.type(Boolean.class)
+				.build();
+		options.addOption(outputCSVOption);
 		
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -137,17 +153,18 @@ public class PasswordDatabaseExporter {
 				System.out.println();
 			}
 			
-			if(cmd.hasOption(outputFilePathOption)) {
-				pde.exportDabaseToJSON(database, new File(cmd.getOptionValue(outputFilePathOption)));
-				if(cmd.hasOption(generatePasswordsOption)) {
-					System.out.println("Written plaintext password database with generated passwords to " + cmd.getOptionValue(outputFilePathOption));
-				}
-				else {
-					System.out.println("Written plaintext password database to " + cmd.getOptionValue(outputFilePathOption));
-				}
+			if(cmd.hasOption(outputCSVOption)) {
+				pde.exportDatabaseToStandardCSV(database, new File(cmd.getOptionValue(outputFilePathOption)));
 			}
 			else {
-				System.out.println(gson.toJson(database));
+				pde.exportDabaseToJSON(database, new File(cmd.getOptionValue(outputFilePathOption)));
+			}
+			
+			if(cmd.hasOption(generatePasswordsOption)) {
+				System.out.println("Written plaintext password database with generated passwords to " + cmd.getOptionValue(outputFilePathOption));
+			}
+			else {
+				System.out.println("Written plaintext password database to " + cmd.getOptionValue(outputFilePathOption));
 			}
 		}
 		catch (Exception ex) {
@@ -175,6 +192,24 @@ public class PasswordDatabaseExporter {
 			throw new JsonSyntaxException(file.getName() + " contains a password database that cannot be deserialized.");
 		}
 		return passwordDatabase;
+	}
+	
+	protected void exportDatabaseToStandardCSV(PasswordDatabase database, File file) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+		FileWriter fw = new FileWriter(file);
+		StatefulBeanToCsv<CSVBeanStandardPasswordEntry> csvSerializer = 
+				new StatefulBeanToCsvBuilder<CSVBeanStandardPasswordEntry>(fw)
+				.withApplyQuotesToAll(false)
+				.withOrderedResults(true)
+				.withQuotechar('"')
+				.withSeparator(',')
+				.build();
+		List<CSVBeanStandardPasswordEntry> csvEntries = new ArrayList<CSVBeanStandardPasswordEntry>();
+		for (PasswordDatabaseEntry entry : database.getDatabase().values()) {
+			CSVBeanStandardPasswordEntry csvEntry = new CSVBeanStandardPasswordEntry(entry);
+			csvEntries.add(csvEntry);
+		}
+		csvSerializer.write(csvEntries);
+		fw.close();
 	}
 	
 	protected void exportDabaseToJSON(PasswordDatabase database, File file) throws IOException {
