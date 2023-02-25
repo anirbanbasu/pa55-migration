@@ -1,4 +1,4 @@
-![CodeQL](https://github.com/anirbanbasu/pa55-migration/actions/workflows/codeql.yml/badge.svg?branch=master&event=push)
+[![CodeQL](https://github.com/anirbanbasu/pa55-migration/actions/workflows/codeql.yml/badge.svg?branch=master&event=push)](https://github.com/anirbanbasu/pa55-migration/actions/workflows/codeql.yml)
 
 # Command line migration tool for PA55NYAPS
 
