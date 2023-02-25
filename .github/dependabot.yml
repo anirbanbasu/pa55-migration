@@ -9,11 +9,20 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
-      
-
-version: 2
-updates:
+    assignees:
+      - "anirbanbasu"
+    target-branch: "master"
   - package-ecosystem: "gradle" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    assignees:
+      - "anirbanbasu"
+    target-branch: "master"
+  - package-ecosystem: "github-actions"
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "anirbanbasu"
+    target-branch: "master"
