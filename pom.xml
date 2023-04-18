@@ -103,7 +103,7 @@
         <groupId>org.spdx</groupId>
         <artifactId>spdx-maven-plugin</artifactId>
         <!-- please check for updates on https://search.maven.org/search?q=a:spdx-maven-plugin -->  
-        <version>0.6.4</version>
+        <version>0.6.5</version>
         <executions>
             <execution>
                 <id>build-spdx</id>
